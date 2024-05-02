@@ -25,19 +25,28 @@ const ipfs = () => {
 
     const HandleRegistration = async (event: any) => {
       event.preventDefault();
+      await uploadText();
       try {
-          const {contract} = state;
-          const handle = textInput; 
-          const ipfs = cid.IpfsHash; 
-          console.log(contract);
-          const transaction = await contract.registerHandle(handle, ipfs);
-          transaction.wait();
-          console.log(transaction);
-          console.log("Handle Registered");
+        const { contract } = state;
+        if (!contract || !contract.registerHandle) {
+          console.error("Contract not initialized or registerHandle not available");
+          return; // Early exit if contract is not set up correctly
+        }
+        const handle = textInput;
+        const ipfs = cid?.IpfsHash;
+        if (!ipfs) {
+          console.error("IPFS hash is missing");
+          return; // Early exit if IPFS hash is not available
+        }
+        console.log("Contract:", contract);
+        const transaction = await contract.registerHandle(handle, ipfs);
+        await transaction.wait();  // Ensure that 'wait' is awaited properly
+        console.log("Transaction:", transaction);
+        console.log("Handle Registered");
       } catch (error) {
-          console.log(error);
+        console.error("Error in HandleRegistration:", error);
       }
-  }
+    }
   
     const uploadText = async () => {
       try {
